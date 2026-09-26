@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>上半身筋トレメニュー</title>
+<meta name="description" content="胸・背中・肩・腕を鍛える上半身の筋トレメニュー。セット数・回数・フォームのポイントとレストタイマー付き。">
+<meta name="theme-color" content="#0f172a">
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #e4572e;
+    --accent-soft: #fde8e1;
+    --done: #16a34a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #334155;
+      --accent: #ff7a50;
+      --accent-soft: #3b2420;
+      --done: #22c55e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif;
+    line-height: 1.6;
+  }
+  header {
+    padding: 40px 16px 24px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); margin: 0 0 8px; letter-spacing: .02em; }
+  .lead { color: var(--muted); margin: 0; }
+  main { max-width: 880px; margin: 0 auto; padding: 0 16px 120px; }
+
+  .tabs {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; gap: 8px; overflow-x: auto;
+    padding: 12px 0; background: var(--bg);
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: none; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    padding: 8px 16px; border-radius: 999px; font-size: .95rem; cursor: pointer;
+  }
+  .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .progress { display: flex; align-items: center; gap: 12px; margin: 8px 0 20px; font-size: .9rem; color: var(--muted); }
+  .bar { flex: 1; height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--done); transition: width .3s; }
+  .reset { border: none; background: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: .85rem; }
+
+  .group { margin-bottom: 32px; }
+  .group h2 { font-size: 1.2rem; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .group h2 small { font-weight: normal; color: var(--muted); font-size: .85rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px; margin-bottom: 12px; display: grid; grid-template-columns: auto 1fr; gap: 12px 14px;
+  }
+  .card.done { opacity: .55; }
+  .card.done .name { text-decoration: line-through; }
+  .check { width: 24px; height: 24px; margin-top: 2px; accent-color: var(--done); cursor: pointer; }
+  .name { font-weight: 700; font-size: 1.05rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+  .pill { background: var(--accent-soft); color: var(--accent); font-size: .8rem; padding: 2px 10px; border-radius: 999px; font-weight: 600; }
+  .pill.gray { background: var(--bg); color: var(--muted); }
+  .tips { margin: 0; padding-left: 1.2em; color: var(--muted); font-size: .92rem; }
+
+  .note {
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+    border-radius: 10px; padding: 14px 16px; font-size: .92rem; margin-bottom: 24px;
+  }
+  .note h3 { margin: 0 0 6px; font-size: 1rem; }
+  .note ul { margin: 0; padding-left: 1.2em; }
+
+  .timer {
+    position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%);
+    width: min(560px, calc(100% - 32px));
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.15);
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  }
+  .timer .label { font-size: .8rem; color: var(--muted); }
+  .timer .time { font-variant-numeric: tabular-nums; font-size: 1.5rem; font-weight: 700; min-width: 4ch; }
+  .timer .time.alarm { color: var(--accent); }
+  .timer .btns { margin-left: auto; display: flex; gap: 6px; }
+  .timer button {
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    border-radius: 10px; padding: 8px 10px; font-size: .9rem; cursor: pointer;
+  }
+  .timer button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  footer { color: var(--muted); font-size: .8rem; text-align: center; padding: 24px 16px 100px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>上半身筋トレメニュー</h1>
+  <p class="lead">胸・背中・肩・腕をバランスよく鍛える週2〜3回向けのメニュー。終わった種目にチェックを入れていきましょう。</p>
+</header>
+
+<main>
+  <div class="note">
+    <h3>基本ルール</h3>
+    <ul>
+      <li>ウォームアップ：軽い有酸素5分＋各種目の最初に軽い重量で1セット</li>
+      <li>重量は「目標回数がギリギリできる」重さに。全セットこなせたら次回少し増やす</li>
+      <li>セット間の休憩：コンパウンド種目は90〜120秒、単関節種目は60秒</li>
+      <li>同じ部位は48〜72時間空けて回復させる</li>
+    </ul>
+  </div>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <div class="progress">
+    <div class="bar"><span id="bar"></span></div>
+    <span id="count">0 / 0</span>
+    <button class="reset" id="reset">リセット</button>
+  </div>
+
+  <div id="list"></div>
+</main>
+
+<footer>痛みや違和感がある場合は無理をせず中止してください。</footer>
+
+<div class="timer" aria-live="polite">
+  <div>
+    <div class="label">レストタイマー</div>
+    <div class="time" id="time">0:00</div>
+  </div>
+  <div class="btns">
+    <button data-sec="60">60秒</button>
+    <button data-sec="90">90秒</button>
+    <button data-sec="120">120秒</button>
+    <button class="primary" id="stop">停止</button>
+  </div>
+</div>
+
+<script>
+const MENU = [
+  {
+    id: "chest", title: "胸", sub: "大胸筋",
+    items: [
+      { name: "ベンチプレス", sets: "4セット", reps: "6〜10回", rest: "120秒", tips: ["肩甲骨を寄せて下げ、胸を張ったまま行う", "バーは乳首のやや下に下ろす", "お尻をベンチから浮かせない"] },
+      { name: "インクライン・ダンベルプレス", sets: "3セット", reps: "8〜12回", rest: "90秒", tips: ["ベンチ角度は30〜45度", "大胸筋上部を意識し、下ろす時にしっかりストレッチ"] },
+      { name: "ダンベルフライ / ケーブルフライ", sets: "3セット", reps: "12〜15回", rest: "60秒", tips: ["肘は軽く曲げたまま固定", "抱きかかえるような弧を描く"] },
+      { name: "腕立て伏せ（自重）", sets: "2セット", reps: "限界まで", rest: "60秒", tips: ["頭からかかとまで一直線", "仕上げのパンプアップに"] },
+    ]
+  },
+  {
+    id: "back", title: "背中", sub: "広背筋・僧帽筋",
+    items: [
+      { name: "懸垂 / ラットプルダウン", sets: "4セット", reps: "6〜12回", rest: "120秒", tips: ["胸をバーに近づけるイメージ", "肘を脇腹へ引き下ろす", "反動を使わない"] },
+      { name: "ベントオーバーロウ", sets: "3セット", reps: "8〜10回", rest: "90秒", tips: ["上体は45度前傾、背中は丸めない", "バーをおへそ方向へ引く"] },
+      { name: "シーテッド・ケーブルロウ", sets: "3セット", reps: "10〜12回", rest: "60秒", tips: ["引き切った位置で肩甲骨を寄せて1秒キープ"] },
+      { name: "フェイスプル", sets: "3セット", reps: "15回", rest: "60秒", tips: ["ロープを顔の高さへ引き、左右に開く", "肩の健康維持にも効果的"] },
+    ]
+  },
+  {
+    id: "shoulders", title: "肩", sub: "三角筋",
+    items: [
+      { name: "ショルダープレス（ダンベル/バーベル）", sets: "4セット", reps: "8〜10回", rest: "90秒", tips: ["腰を反らしすぎない", "耳の横まで下ろして真上へ押し上げる"] },
+      { name: "サイドレイズ", sets: "3セット", reps: "12〜15回", rest: "60秒", tips: ["小指側をやや上にして肩の高さまで", "僧帽筋に逃がさないよう軽めの重量で"] },
+      { name: "リアレイズ", sets: "3セット", reps: "12〜15回", rest: "60秒", tips: ["上体を前傾し、肘から横へ開く", "三角筋後部を意識"] },
+    ]
+  },
+  {
+    id: "arms", title: "腕", sub: "上腕二頭筋・三頭筋",
+    items: [
+      { name: "バーベルカール", sets: "3セット", reps: "8〜12回", rest: "60秒", tips: ["肘の位置を固定し、体を振らない", "下ろす動作はゆっくり2〜3秒"] },
+      { name: "ハンマーカール", sets: "3セット", reps: "10〜12回", rest: "60秒", tips: ["親指を上にした縦持ちで", "前腕・上腕筋も同時に鍛えられる"] },
+      { name: "ナローベンチプレス / ディップス", sets: "3セット", reps: "8〜12回", rest: "90秒", tips: ["手幅は肩幅程度", "肘を体側に沿わせて三頭筋を狙う"] },
+      { name: "ケーブル・プレスダウン", sets: "3セット", reps: "12〜15回", rest: "60秒", tips: ["肘を脇に固定し、伸ばし切って1秒キープ"] },
+    ]
+  },
+];
+
+const STORE = "ubw-done-v1";
+let done = {};
+try { done = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) {}
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify(done)); } catch (e) {} };
+
+let current = "all";
+const tabs = document.getElementById("tabs");
+const list = document.getElementById("list");
+
+function renderTabs() {
+  const all = [{ id: "all", title: "すべて" }, ...MENU];
+  tabs.innerHTML = all.map(g =>
+    `<button class="tab" role="tab" aria-selected="${g.id === current}" data-id="${g.id}">${g.title}</button>`
+  ).join("");
+}
+
+function renderList() {
+  const groups = current === "all" ? MENU : MENU.filter(g => g.id === current);
+  list.innerHTML = groups.map(g => `
+    <section class="group">
+      <h2>${g.title}<small>${g.sub}</small></h2>
+      ${g.items.map((it, i) => {
+        const key = `${g.id}-${i}`;
+        return `
+        <label class="card ${done[key] ? "done" : ""}">
+          <input type="checkbox" class="check" data-key="${key}" ${done[key] ? "checked" : ""}>
+          <div>
+            <div class="name">${it.name}</div>
+            <div class="meta">
+              <span class="pill">${it.sets}</span>
+              <span class="pill">${it.reps}</span>
+              <span class="pill gray">休憩 ${it.rest}</span>
+            </div>
+            <ul class="tips">${it.tips.map(t => `<li>${t}</li>`).join("")}</ul>
+          </div>
+        </label>`;
+      }).join("")}
+    </section>`).join("");
+  renderProgress(groups);
+}
+
+function renderProgress(groups) {
+  const keys = groups.flatMap(g => g.items.map((_, i) => `${g.id}-${i}`));
+  const n = keys.filter(k => done[k]).length;
+  document.getElementById("count").textContent = `${n} / ${keys.length}`;
+  document.getElementById("bar").style.width = keys.length ? `${(n / keys.length) * 100}%` : "0";
+}
+
+tabs.addEventListener("click", e => {
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  current = b.dataset.id;
+  renderTabs(); renderList();
+});
+
+list.addEventListener("change", e => {
+  if (!e.target.matches(".check")) return;
+  const key = e.target.dataset.key;
+  if (e.target.checked) done[key] = true; else delete done[key];
+  save(); renderList();
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  done = {}; save(); renderList();
+});
+
+// Rest timer
+const timeEl = document.getElementById("time");
+let remaining = 0, handle = null;
+const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+function tick() {
+  remaining--;
+  timeEl.textContent = fmt(Math.max(remaining, 0));
+  if (remaining <= 0) {
+    clearInterval(handle); handle = null;
+    timeEl.classList.add("alarm");
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  }
+}
+document.querySelectorAll(".timer [data-sec]").forEach(b => b.addEventListener("click", () => {
+  clearInterval(handle);
+  remaining = Number(b.dataset.sec);
+  timeEl.classList.remove("alarm");
+  timeEl.textContent = fmt(remaining);
+  handle = setInterval(tick, 1000);
+}));
+document.getElementById("stop").addEventListener("click", () => {
+  clearInterval(handle); handle = null; remaining = 0;
+  timeEl.classList.remove("alarm");
+  timeEl.textContent = fmt(0);
+});
+
+renderTabs(); renderList();
+</script>
+</body>
+</html>
